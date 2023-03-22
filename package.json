@@ -30,11 +30,11 @@
     },
     "scripts": {
         "start": "react-scripts start",
-        "build": "react-scripts build",
+        "build": "react-scripts build && node ./postbuild.js",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "package": "bash package.sh",
-        "zip": "npm run build && npm run package"
+        "zip": "npm run build && npm run postbuild  npm run package"
     },
     "eslintConfig": {
         "extends": [
