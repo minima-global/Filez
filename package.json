@@ -33,9 +33,8 @@
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "version-bump": "node bump-dapp-patch-version-number.js",
         "package": "bash package.sh",
-        "build-zip": "npm run version-bump && npm run build && npm run package"
+        "zip": "npm run build && npm run package"
     },
     "eslintConfig": {
         "extends": [
