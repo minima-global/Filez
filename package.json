@@ -34,7 +34,7 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "package": "bash package.sh",
-        "zip": "npm run build && npm run postbuild  npm run package"
+        "zip": "npm run build && npm run postbuild && npm run package"
     },
     "eslintConfig": {
         "extends": [
