@@ -13,21 +13,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
+          cache: 'yarn'
 
-      - name: Run install
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install
+      - name: Install JS dependencies
+        run: yarn install
 
-      - name: Build production bundle
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build
+      - name: Build production JS files
+        run: yarn run build
 
-      - name: Zip production bundle
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: zip
+      - name: Zip production files
+        run: yarn run zip
 
       - name: get-npm-version
         id: package-version
