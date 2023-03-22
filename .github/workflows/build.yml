@@ -29,11 +29,15 @@ jobs:
         with:
           cmd: zip
 
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+
       - name: Artifact build files
         uses: actions/upload-artifact@v3
         with:
-          name: code-coverage-report
-          path: filez-0.0.2.mds.zip
+          name: filez-${{ steps.package-version.outputs.current-version}}.mds.zip
+          path: filez-${{ steps.package-version.outputs.current-version}}.mds.zip
 
 #      - name: Veracode Upload And Scan
 #        uses: veracode/veracode-uploadandscan-action@0.2.4
