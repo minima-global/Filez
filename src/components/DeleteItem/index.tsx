@@ -42,7 +42,7 @@ export function DeleteItem({ display, data, close, callback }: any) {
                           />
                         </svg>
                         <h5 className="font-bold -mt-2 mb-8 mx-auto" style={{ fontSize: '22px' }}>
-                          Are you sure you want to delete {multiple ?  'these files' : 'this file'}?
+                          Are you sure you want to delete {multiple ?  `these items` : `this ${data && data.file.isdir ? 'folder' : 'file'}`}?
                         </h5>
                         <div className="text-center">
                           <button className="button button--thick w-full">Confirm</button>
