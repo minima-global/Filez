@@ -24,7 +24,7 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     try {
       const path = window.location.pathname.split('/')
           .filter(i => i !== '')
-          .filter(i => i === '/');
+          .filter(i => i.includes('0x'));
 
       if (path[0]) {
         setPathname(path[0] as string);

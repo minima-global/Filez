@@ -62,10 +62,10 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
-            <button onClick={downloadFile} className="button text-sm">
+            <button onClick={downloadFile} className="button">
               Download
             </button>
-            <button onClick={deleteFile} className="button text-sm">
+            <button onClick={deleteFile} className="button">
               Delete
             </button>
           </div>
@@ -94,13 +94,13 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
 
           <div className="mb-4">
             <h5 className="text-custom-grey-2 mb-2">Location</h5>
-            <div className="mb-4">{fullPath}/{data.name}</div>
+            <div className="mb-4 break-words">{fullPath}/{data.name}</div>
 
             <Clipboard data-clipboard-text={`${fullPath}/${data.name}`} onClick={() => setCopied(true)}>
-              <div className="relative button text-sm pr-10">
+              <div className="relative button pr-10">
                 {copied && 'Copied to clipboard'}
                 {!copied && 'Copy pathname'}
-                {copied && <img className="ml-2 inline" src={checkCircleSvg} alt="Success" width={18} />}
+                {copied && <img className="-mt-0.5 ml-2 inline" src={checkCircleSvg} alt="Success" width={18} />}
               </div>
             </Clipboard>
           </div>

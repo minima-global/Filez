@@ -248,11 +248,11 @@ const Home = () => {
         )}
         {!displaySearch && (
           <div className="flex gap-2 pl-5 pr-5 pb-2">
-            <label className="button text-sm cursor-pointer">
+            <label className="button cursor-pointer">
               Upload file
               <input type="file" onChange={handleFileOnChange} className="button hidden" />
             </label>
-            <button onClick={showCreateFolder} className="button text-sm">
+            <button onClick={showCreateFolder} className="button">
               Create folder
             </button>
             {checked.length > 1 && (

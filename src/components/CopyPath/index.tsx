@@ -35,7 +35,7 @@ export function CopyPath({ display, data, close }: any) {
                         File path
                       </h5>
                       {data && (
-                        <div className="background-grey p-3 mb-6 break-words text-sm">
+                        <div className="background-grey p-3 mb-6 break-words">
                           {fullPath}/{data.file.name}
                         </div>
                       )}
@@ -45,7 +45,7 @@ export function CopyPath({ display, data, close }: any) {
                             <div className="relative button button--thick w-full">
                               {copied && 'Copied to clipboard'}
                               {!copied && 'Copy pathname'}
-                              {copied && <img className="absolute right-4 top-3.5" src={checkCircleSvg} alt="Success" />}
+                              {copied && <img className="absolute right-4 top-4" src={checkCircleSvg} alt="Success" />}
                             </div>
                           </Clipboard>
                         )}
