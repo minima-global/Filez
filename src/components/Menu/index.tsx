@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import * as minima from '../../__minima__';
+import route from '../../assets/route.svg';
 
-export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename, display, close }: any) {
+export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename, setDisplayCopyPath, display, close }: any) {
   const transition = useTransition(display, {
     from: {
       y: '20%',
@@ -42,6 +43,11 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
   const moveItem = () => {
     close();
     setDisplayMove(data);
+  };
+
+  const copyPath = () => {
+    close();
+    setDisplayCopyPath(data);
   };
 
   return (
@@ -94,6 +100,14 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
                           </div>
                         </div>
                       )}
+                      <div onClick={copyPath} className="cursor-pointer grid grid-cols-12 mb-5">
+                        <div className="col-span-1">
+                          <img src={route} alt="Copy path" />
+                        </div>
+                        <div className="col-span-10 text-left flex items-center">
+                          <span className="pl-4">File path</span>
+                        </div>
+                      </div>
                       <div onClick={renameItem} className="cursor-pointer grid grid-cols-12 mb-8">
                         <div className="col-span-1">
                           <svg width="26" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">

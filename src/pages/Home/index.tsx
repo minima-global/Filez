@@ -16,6 +16,7 @@ import {
   formatBytes,
   blobToArrayBuffer,
 } from '../../utilities';
+import CopyPath from "../../components/CopyPath";
 
 const Home = () => {
   const { title, previousPath, list, path, setPath, canonical, reloadDirectory } = useFileList(true);
@@ -31,6 +32,7 @@ const Home = () => {
   const [displayDelete, setDisplayDelete] = useState<any>(false);
   const [displayCreateFolder, setDisplayCreateFolder] = useState(false);
   const [displayMultipleMenu, setDisplayMultipleMenu] = useState<any>(false);
+  const [displayCopyPath, setDisplayCopyPath] = useState<any>(false);
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<any>(null);
@@ -193,11 +195,12 @@ const Home = () => {
   return (
     <div>
       <MoveItem data={displayMove} display={!!displayMove} close={hideMove} callback={reloadDirectory} />
-      <Menu data={displayMenu} display={!!displayMenu} setDisplayMove={setDisplayMove} setDisplayRename={setDisplayRename} setDisplayDelete={setDisplayDelete} close={hideMenu} />
+      <Menu data={displayMenu} display={!!displayMenu} setDisplayMove={setDisplayMove} setDisplayRename={setDisplayRename} setDisplayDelete={setDisplayDelete} close={hideMenu} displayCopyPath={displayCopyPath} setDisplayCopyPath={setDisplayCopyPath} />
       <MultipleMenu data={displayMultipleMenu} display={!!displayMultipleMenu} setDisplayMove={setDisplayMove} setDisplayDelete={setDisplayDelete} close={hideMultipleMenu} />
       <CreateFolder display={displayCreateFolder} close={hideCreateFolder} createFolder={createFolder} callback={reloadDirectory} />
       <DeleteItem data={displayDelete} display={!!displayDelete} close={hideDelete} callback={reloadDirectory} />
       <RenameItem data={displayRename} display={!!displayRename} close={hideRename} callback={reloadDirectory} />
+      <CopyPath data={displayCopyPath} display={!!displayCopyPath} close={() => setDisplayCopyPath(false)} />
       <div>
         <div className="grid grid-cols-2 p-5">
           <div className="col-span-1 flex items-center">
@@ -245,11 +248,11 @@ const Home = () => {
         )}
         {!displaySearch && (
           <div className="flex gap-2 pl-5 pr-5 pb-2">
-            <label className="button cursor-pointer">
+            <label className="button text-sm cursor-pointer">
               Upload file
               <input type="file" onChange={handleFileOnChange} className="button hidden" />
             </label>
-            <button onClick={showCreateFolder} className="button">
+            <button onClick={showCreateFolder} className="button text-sm">
               Create folder
             </button>
             {checked.length > 1 && (

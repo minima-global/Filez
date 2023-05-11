@@ -1,12 +1,27 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from "react";
 import * as minima from '../../__minima__';
 import * as utilities from '../../utilities';
+import { appContext } from "../../AppContext";
+import checkCircleSvg from "../../assets/check_circle.svg";
+import Clipboard from "react-clipboard.js";
 
 const File: any = ({ data, setDisplayDelete, close }: any) => {
+  const { fullPath } = useContext(appContext);
   const [image, setImage] = useState<any>(null);
   const fileSize = utilities.formatBytes(data.size);
   const extension = utilities.getExtension(data.name);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCopied(false);
+    }, 2500);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [copied]);
 
   /**
    * Load binary file if the extension is an image
@@ -47,10 +62,10 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
-            <button onClick={downloadFile} className="button">
+            <button onClick={downloadFile} className="button text-sm">
               Download
             </button>
-            <button onClick={deleteFile} className="button">
+            <button onClick={deleteFile} className="button text-sm">
               Delete
             </button>
           </div>
@@ -72,9 +87,22 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
             <div>{fileSize}</div>
           </div>
 
-          <div>
+          <div className="mb-4">
             <h5 className="text-custom-grey-2 mb-2">File Type</h5>
             <div>{extension}</div>
+          </div>
+
+          <div className="mb-4">
+            <h5 className="text-custom-grey-2 mb-2">Location</h5>
+            <div className="mb-4">{fullPath}/{data.name}</div>
+
+            <Clipboard data-clipboard-text={`${fullPath}/${data.name}`} onClick={() => setCopied(true)}>
+              <div className="relative button text-sm pr-10">
+                {copied && 'Copied to clipboard'}
+                {!copied && 'Copy pathname'}
+                {copied && <img className="ml-2 inline" src={checkCircleSvg} alt="Success" width={18} />}
+              </div>
+            </Clipboard>
           </div>
         </div>
       </div>

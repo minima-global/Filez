@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from "react";
+import { getStatus } from "./__minima__";
 
 export const appContext = createContext({} as any);
 
@@ -9,6 +10,29 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     message: '',
     callback: null,
   });
+  const [root, setRoot] = useState('');
+  const [pathname, setPathname] = useState<string | null>(null);
+  const fullPath = root + (!!pathname ? `/${pathname}` : '');
+
+  useEffect(() => {
+    getStatus().then((response: any) => {
+      setRoot(response.data);
+    })
+  }, []);
+
+  useEffect(() => {
+    try {
+      const path = window.location.pathname.split('/')
+          .filter(i => i !== '')
+          .filter(i => i === '/');
+
+      if (path[0]) {
+        setPathname(path[0] as string);
+      }
+    } catch {
+      setPathname(null);
+    }
+  }, []);
 
   const promptNotification = (message: string, callback: unknown) => {
     _setNotification({ display: true, message, callback });
@@ -19,6 +43,9 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   };
 
   const value = {
+    root,
+    pathname,
+    fullPath,
     _notification,
     promptNotification,
     dismissNotification,

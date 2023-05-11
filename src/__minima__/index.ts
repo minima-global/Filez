@@ -182,4 +182,16 @@ export function renameFile(fileName: string, newFileName: string) {
 }
 
 
+export function getStatus() {
+  return new Promise((resolve, reject) => {
+    (window as any).MDS.cmd(`status`, function (response: any) {
+      if (response.response) {
+        return resolve(response.response);
+      }
+
+      return reject();
+    });
+  });
+}
+
 export default exports;
