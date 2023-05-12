@@ -174,6 +174,7 @@ const Home = () => {
 
   const hideDelete = () => {
     setDisplayDelete(false);
+    setDisplayFile(false);
   }
 
   const hideMultipleMenu = () => {

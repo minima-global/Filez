@@ -2,8 +2,10 @@ import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import { deleteFile } from '../../__minima__';
 import { modalAnimation } from '../../animations';
+import { useNavigate } from "react-router-dom";
 
 export function DeleteItem({ display, data, close, callback }: any) {
+  const navigate = useNavigate();
   const multiple = Array.isArray(data);
 
   const transition = useTransition(display, modalAnimation);

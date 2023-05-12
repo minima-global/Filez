@@ -28,7 +28,7 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
    */
   useEffect(() => {
     if (['PNG', 'JPG', 'JPEG'].includes(extension)) {
-      minima.loadBinary(data.name).then((file) => {
+      minima.loadBinary(data.location).then((file) => {
         setImage(file);
       });
     } else {
@@ -94,12 +94,12 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
 
           <div className="mb-4">
             <h5 className="text-custom-grey-2 mb-2">Location</h5>
-            <div className="mb-4 break-words">{fullPath}/{data.name}</div>
+            <div className="mb-4 break-words">{fullPath}{data.location}</div>
 
-            <Clipboard data-clipboard-text={`${fullPath}/${data.name}`} onClick={() => setCopied(true)}>
+            <Clipboard data-clipboard-text={`${fullPath}${data.location}`} onClick={() => setCopied(true)}>
               <div className="relative button pr-10">
                 {copied && 'Copied to clipboard'}
-                {!copied && 'Copy pathname'}
+                {!copied && 'Copy path'}
                 {copied && <img className="-mt-0.5 ml-2 inline" src={checkCircleSvg} alt="Success" width={18} />}
               </div>
             </Clipboard>

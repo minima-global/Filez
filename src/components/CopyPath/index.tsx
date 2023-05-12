@@ -36,15 +36,15 @@ export function CopyPath({ display, data, close }: any) {
                       </h5>
                       {data && (
                         <div className="background-grey p-3 mb-6 break-words">
-                          {fullPath}/{data.file.name}
+                          {fullPath}{data.file.location}
                         </div>
                       )}
                       <div className="text-center">
                         {data && (
-                          <Clipboard className="w-full" data-clipboard-text={`${fullPath}/${data.file.name}`} onClick={() => setCopied(true)}>
+                          <Clipboard className="w-full" data-clipboard-text={`${fullPath}${data.file.location}`} onClick={() => setCopied(true)}>
                             <div className="relative button button--thick w-full">
                               {copied && 'Copied to clipboard'}
-                              {!copied && 'Copy pathname'}
+                              {!copied && 'Copy path'}
                               {copied && <img className="absolute right-4 top-4" src={checkCircleSvg} alt="Success" />}
                             </div>
                           </Clipboard>
