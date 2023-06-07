@@ -141,6 +141,13 @@ export function downloadFile(path: string, name: string) {
 
         var url = URL.createObjectURL(blob);
 
+        // webview download support
+        if (window.navigator.userAgent.includes("Minima Browser")) {
+
+          // @ts-ignore
+          return Android.blobDownload(name, filedata);
+        }
+
         // Create a link element
         var link = document.createElement('a');
         link.href = url;

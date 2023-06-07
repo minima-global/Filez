@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 // @ts-ignore, had to use different package due to official package  not supporting react 18
 import Lottie from '@amelix/react-lottie';
 import animationData from '../../splashAnimation.json';
+import useSplash from "../../hooks/useSplash";
 
 export const Splash = () => {
-  const [display, setDisplay] = useState(true);
+  const { display, setDisplay } = useSplash();
 
   /**
    * Hide the splash screen after 1.5 seconds
@@ -14,7 +15,7 @@ export const Splash = () => {
     setTimeout(() => {
       setDisplay(false);
     }, 1500);
-  }, [display]);
+  }, [display, setDisplay]);
 
   const defaultOptions = {
     loop: false,
