@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AppProvider from './AppContext';
 import Home from './pages/Home';
 import Splash from './components/Splash';
-import Titlebar from "./components/Titlebar";
+import Titlebar from "./components/TitleBar";
 
 function App() {
   const [loaded, setLoaded] = useState(false);
