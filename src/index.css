@@ -23,7 +23,6 @@ body {
     margin: 0 auto;
     max-width: 420px;
     background-color: white;
-    min-height: 100vh;
     overflow-x: hidden;
     height: 100%;
     width: 100%;
@@ -215,4 +214,25 @@ body {
 
 .background-grey {
     background-color: #F4F4F5;
+}
+
+.title-bar {
+    display: flex;
+    align-items: center;
+    background: black;
+    height: 54px;
+    padding: 0 24px;
+    color: white;
+    user-select: none;
+    font-weight: bold;
+}
+
+.title-bar__icon {
+    margin-left: -4px;
+    margin-right: 16px;
+}
+
+.title-bar__title {
+    font-size: 18px;
+    font-weight: bold;
 }

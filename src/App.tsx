@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AppProvider from './AppContext';
 import Home from './pages/Home';
 import Splash from './components/Splash';
+import Titlebar from "./components/Titlebar";
 
 function App() {
   const [loaded, setLoaded] = useState(false);
@@ -18,9 +19,12 @@ function App() {
 
   return (
     <AppProvider>
-      <div className="mobile-container restriction">
-        <Splash />
-        <Home />
+      <Splash />
+      <div className="flex flex-col min-h-screen">
+        <Titlebar />
+        <div className="mobile-container restriction grow">
+          <Home />
+        </div>
       </div>
     </AppProvider>
   );
