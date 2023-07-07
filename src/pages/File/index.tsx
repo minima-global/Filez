@@ -5,6 +5,8 @@ import * as utilities from '../../utilities';
 import { appContext } from "../../AppContext";
 import checkCircleSvg from "../../assets/check_circle.svg";
 import Clipboard from "react-clipboard.js";
+import { copyToWeb } from "../../__minima__";
+import { getAppUID } from "../../utilities";
 
 const File: any = ({ data, setDisplayDelete, close }: any) => {
   const { fullPath } = useContext(appContext);
@@ -41,8 +43,16 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
   };
 
   const downloadFile = async () => {
-    await minima.downloadFile(data.location, data.name);
-  };
+    await copyToWeb(`${data.location}`, `/${data.name}`);
+    // @ts-ignore
+    const url = `${MDS.filehost}${getAppUID()}/${data.name}`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'download';
+    link.target = '_blank';
+    link.click();
+  }
 
   return (
     <div>
@@ -62,9 +72,16 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
+            {/* @ts-ignore */}
             <button onClick={downloadFile} className="button">
               Download
             </button>
+            {/* @ts-ignore */}
+            <a href={`${MDS.filehost}${getAppUID()}/${data.name}`} download>
+              <button className="button">
+                Download !
+              </button>
+            </a>
             <button onClick={deleteFile} className="button">
               Delete
             </button>

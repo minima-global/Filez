@@ -13,6 +13,8 @@ var MDS_MAIN_CALLBACK = null;
  * Main MINIMA Object for all interaction
  */
 var MDS = {
+    //Main File host
+    filehost : "",
 
     //RPC Host for Minima
     mainhost : "",
@@ -78,6 +80,7 @@ var MDS = {
 
         MDS.log("MDS FILEHOST  : https://"+host+":"+port+"/");
 
+        MDS.filehost = "https://"+host+":"+port+"/";
         MDS.mainhost 	= "https://"+host+":"+mainport+"/";
         MDS.log("MDS MAINHOST : "+MDS.mainhost);
 
@@ -307,6 +310,18 @@ var MDS = {
 
             //Create the single line
             var commsline = "move&"+filename+"&"+newfilename;
+
+            //Send via POST
+            httpPostAsync(MDS.mainhost+"file?"+"uid="+MDS.minidappuid, commsline, callback);
+        },
+
+        /**
+         * Copy a file to your web folder
+         */
+        copytoweb : function(file, webfile, callback){
+
+            //Create the single line
+            var commsline = "copytoweb&"+file+"&"+webfile;
 
             //Send via POST
             httpPostAsync(MDS.mainhost+"file?"+"uid="+MDS.minidappuid, commsline, callback);

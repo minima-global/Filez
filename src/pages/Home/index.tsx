@@ -1,22 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { makeFolder, saveBinary } from '../../__minima__';
+import { makeFolder, moveFile } from '../../__minima__';
 import { useFileList, useHelpers } from '../../hooks';
 import File from '../File';
-import {
-  Menu,
-  MoveItem,
-  DeleteItem,
-  RenameItem,
-  MultipleMenu,
-  CreateFolder,
-  Notification,
-} from '../../components';
-import {
-  bufferToHex,
-  formatBytes,
-  blobToArrayBuffer,
-} from '../../utilities';
-import CopyPath from "../../components/CopyPath";
+import { Menu, MoveItem, DeleteItem, RenameItem, MultipleMenu, CreateFolder, Notification } from '../../components';
+import { formatBytes } from '../../utilities';
+import CopyPath from '../../components/CopyPath';
+import axios from 'axios';
 
 const Home = () => {
   const { title, previousPath, list, path, setPath, canonical, reloadDirectory } = useFileList(true);
@@ -33,6 +22,8 @@ const Home = () => {
   const [displayCreateFolder, setDisplayCreateFolder] = useState(false);
   const [displayMultipleMenu, setDisplayMultipleMenu] = useState<any>(false);
   const [displayCopyPath, setDisplayCopyPath] = useState<any>(false);
+
+  const [uploading, setUploading] = useState(false);
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<any>(null);
@@ -51,13 +42,31 @@ const Home = () => {
    * @returns {Promise<void>}
    */
   const handleFileOnChange = async (evt: any) => {
-    const file = evt.target.files[0];
-    setFile(file);
-    const fileName = file.name;
-    const arrayBuffer = await blobToArrayBuffer(file);
-    const hex = bufferToHex(arrayBuffer);
-    await saveBinary(path + '/' + fileName, hex);
-    reloadDirectory();
+    try {
+      const file = evt.target.files[0];
+      setFile(file);
+
+      if (file) {
+        const formData = new FormData();
+        formData.append('fileupload', file);
+        // @ts-ignore
+        formData.append('uid', MDS.minidappuid);
+        formData.append('jumppage', 'index.html');
+
+        setUploading(true);
+
+        // @ts-ignore
+        await axios.post(MDS.filehost + 'fileupload.html', formData);
+        await moveFile('/fileupload/' + file.name, path + '/' + file.name);
+
+        setUploading(false);
+
+        reloadDirectory();
+      }
+    } catch (e) {
+      setUploading(false);
+      reloadDirectory();
+    }
   };
 
   /**
@@ -72,7 +81,7 @@ const Home = () => {
 
   const showCreateFolder = () => {
     setDisplayCreateFolder(true);
-  }
+  };
 
   const showMenu = (file: any) => {
     setDisplayMenu({
@@ -83,15 +92,15 @@ const Home = () => {
 
   const showSearch = () => {
     setDisplaySearch(true);
-  }
+  };
 
   const openMultipleMenu = () => {
     setDisplayMultipleMenu(checked);
-  }
+  };
 
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(evt.target.value);
-  }
+  };
 
   /**
    * Returns list in order based on sort
@@ -123,7 +132,6 @@ const Home = () => {
     return orderedList;
   }, [list, query, sort]);
 
-
   /**
    * Toggles all files so that they're either all selected or all not selected
    */
@@ -154,15 +162,15 @@ const Home = () => {
 
   const hideFile = () => {
     setDisplayFile(false);
-  }
+  };
 
   const hideRename = () => {
     setDisplayRename(false);
-  }
+  };
 
   const hideMove = () => {
     setDisplayMove(false);
-  }
+  };
 
   const hideMenu = () => {
     setDisplayMenu(false);
@@ -170,16 +178,16 @@ const Home = () => {
 
   const hideCreateFolder = () => {
     setDisplayCreateFolder(false);
-  }
+  };
 
   const hideDelete = () => {
     setDisplayDelete(false);
     setDisplayFile(false);
-  }
+  };
 
   const hideMultipleMenu = () => {
     setDisplayMultipleMenu(false);
-  }
+  };
 
   if (displayFile) {
     return (
@@ -195,8 +203,24 @@ const Home = () => {
 
   return (
     <div>
+      {uploading && (
+        <div className="absolute w-full h-full bg-black bg-opacity-30 left-0 top-0 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg box-shadow-md p-5 flex flex-col justify-center">
+            <div className="spinner-border block mx-auto" />
+          </div>
+        </div>
+      )}
       <MoveItem data={displayMove} display={!!displayMove} close={hideMove} callback={reloadDirectory} />
-      <Menu data={displayMenu} display={!!displayMenu} setDisplayMove={setDisplayMove} setDisplayRename={setDisplayRename} setDisplayDelete={setDisplayDelete} close={hideMenu} displayCopyPath={displayCopyPath} setDisplayCopyPath={setDisplayCopyPath} />
+      <Menu
+        data={displayMenu}
+        display={!!displayMenu}
+        setDisplayMove={setDisplayMove}
+        setDisplayRename={setDisplayRename}
+        setDisplayDelete={setDisplayDelete}
+        close={hideMenu}
+        displayCopyPath={displayCopyPath}
+        setDisplayCopyPath={setDisplayCopyPath}
+      />
       <MultipleMenu data={displayMultipleMenu} display={!!displayMultipleMenu} setDisplayMove={setDisplayMove} setDisplayDelete={setDisplayDelete} close={hideMultipleMenu} />
       <CreateFolder display={displayCreateFolder} close={hideCreateFolder} createFolder={createFolder} callback={reloadDirectory} />
       <DeleteItem data={displayDelete} display={!!displayDelete} close={hideDelete} callback={reloadDirectory} />
@@ -289,30 +313,34 @@ const Home = () => {
         <Notification />
         <div className="flex flex-col p-5">
           {files &&
-            files.map((file: any) => (
-              <div key={file.name} className={`item cursor-pointer flex items-center p-1 ${checked.includes(file.location) ? 'item__selected' : ''}`}>
-                <div className="flex items-center pr-5">
-                  <input type="checkbox" className="checkbox" readOnly checked={checked.includes(file.location)} onClick={() => toggleChecked(file)} />
+            files.map((file: any) => {
+              if (file.location === '/fileupload') {
+                return <div key="unknown" />;
+              }
+
+              return (
+                <div key={file.name} className={`item cursor-pointer flex items-center p-1 ${checked.includes(file.location) ? 'item__selected' : ''}`}>
+                  <div className="flex items-center pr-5">
+                    <input type="checkbox" className="checkbox" readOnly checked={checked.includes(file.location)} onClick={() => toggleChecked(file)} />
+                  </div>
+                  <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="pr-5">
+                    {renderIcon(file)}
+                  </div>
+                  <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="flex-grow text-overflow">
+                    <div className="w-full text-overflow pr-5">{file.name}</div>
+                    {!file.isdir && <div className="text-custom-grey text-sm">{formatBytes(file.size)}</div>}
+                  </div>
+                  <div onClick={() => showMenu(file)} className="cursor-pointer px-3 py-3">
+                    <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M1.99997 15.2688C1.58749 15.2688 1.23438 15.122 0.940625 14.8282C0.646875 14.5345 0.5 14.1814 0.5 13.7689C0.5 13.3564 0.646875 13.0033 0.940625 12.7095C1.23438 12.4158 1.58749 12.2689 1.99997 12.2689C2.41246 12.2689 2.76558 12.4158 3.05933 12.7095C3.35308 13.0033 3.49995 13.3564 3.49995 13.7689C3.49995 14.1814 3.35308 14.5345 3.05933 14.8282C2.76558 15.122 2.41246 15.2688 1.99997 15.2688ZM1.99997 9.49962C1.58749 9.49962 1.23438 9.35274 0.940625 9.05899C0.646875 8.76524 0.5 8.41213 0.5 7.99964C0.5 7.58716 0.646875 7.23404 0.940625 6.94029C1.23438 6.64654 1.58749 6.49967 1.99997 6.49967C2.41246 6.49967 2.76558 6.64654 3.05933 6.94029C3.35308 7.23404 3.49995 7.58716 3.49995 7.99964C3.49995 8.41213 3.35308 8.76524 3.05933 9.05899C2.76558 9.35274 2.41246 9.49962 1.99997 9.49962ZM1.99997 3.73039C1.58749 3.73039 1.23438 3.58352 0.940625 3.28977C0.646875 2.99604 0.5 2.64292 0.5 2.23042C0.5 1.81794 0.646875 1.46482 0.940625 1.17107C1.23438 0.877335 1.58749 0.730469 1.99997 0.730469C2.41246 0.730469 2.76558 0.877335 3.05933 1.17107C3.35308 1.46482 3.49995 1.81794 3.49995 2.23042C3.49995 2.64292 3.35308 2.99604 3.05933 3.28977C2.76558 3.58352 2.41246 3.73039 1.99997 3.73039Z"
+                        fill="#1C1B1F"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="pr-5">
-                  {renderIcon(file)}
-                </div>
-                <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="flex-grow text-overflow">
-                  <div className="w-full text-overflow pr-5">{file.name}</div>
-                  {!file.isdir && (
-                    <div className="text-custom-grey text-sm">{formatBytes(file.size)}</div>
-                  )}
-                </div>
-                <div onClick={() => showMenu(file)} className="cursor-pointer px-3 py-3">
-                  <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M1.99997 15.2688C1.58749 15.2688 1.23438 15.122 0.940625 14.8282C0.646875 14.5345 0.5 14.1814 0.5 13.7689C0.5 13.3564 0.646875 13.0033 0.940625 12.7095C1.23438 12.4158 1.58749 12.2689 1.99997 12.2689C2.41246 12.2689 2.76558 12.4158 3.05933 12.7095C3.35308 13.0033 3.49995 13.3564 3.49995 13.7689C3.49995 14.1814 3.35308 14.5345 3.05933 14.8282C2.76558 15.122 2.41246 15.2688 1.99997 15.2688ZM1.99997 9.49962C1.58749 9.49962 1.23438 9.35274 0.940625 9.05899C0.646875 8.76524 0.5 8.41213 0.5 7.99964C0.5 7.58716 0.646875 7.23404 0.940625 6.94029C1.23438 6.64654 1.58749 6.49967 1.99997 6.49967C2.41246 6.49967 2.76558 6.64654 3.05933 6.94029C3.35308 7.23404 3.49995 7.58716 3.49995 7.99964C3.49995 8.41213 3.35308 8.76524 3.05933 9.05899C2.76558 9.35274 2.41246 9.49962 1.99997 9.49962ZM1.99997 3.73039C1.58749 3.73039 1.23438 3.58352 0.940625 3.28977C0.646875 2.99604 0.5 2.64292 0.5 2.23042C0.5 1.81794 0.646875 1.46482 0.940625 1.17107C1.23438 0.877335 1.58749 0.730469 1.99997 0.730469C2.41246 0.730469 2.76558 0.877335 3.05933 1.17107C3.35308 1.46482 3.49995 1.81794 3.49995 2.23042C3.49995 2.64292 3.35308 2.99604 3.05933 3.28977C2.76558 3.58352 2.41246 3.73039 1.99997 3.73039Z"
-                      fill="#1C1B1F"
-                    />
-                  </svg>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           {noFiles && hasQuery && (
             <div className="py-10 text-center">
               <div className="flex flex-col justify-center gap-5">

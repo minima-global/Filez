@@ -188,10 +188,34 @@ export function renameFile(fileName: string, newFileName: string) {
   });
 }
 
+export function moveFile(originalFilePath: string, newFilePath: string) {
+  return new Promise((resolve, reject) => {
+    (window as any).MDS.file.move(originalFilePath, newFilePath, function(response: any) {
+      if (response.status) {
+        return resolve(true);
+      }
+
+      return reject();
+    });
+  });
+}
+
 
 export function getStatus() {
   return new Promise((resolve, reject) => {
     (window as any).MDS.cmd(`status`, function (response: any) {
+      if (response.response) {
+        return resolve(response.response);
+      }
+
+      return reject();
+    });
+  });
+}
+
+export function copyToWeb(fileLocation: string, newFilePath: string) {
+  return new Promise((resolve, reject) => {
+    (window as any).MDS.file.copytoweb(fileLocation, newFilePath, function (response: any) {
       if (response.response) {
         return resolve(response.response);
       }
