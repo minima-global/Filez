@@ -1,6 +1,6 @@
 {
     "name": "filez",
-    "version": "1.3.3",
+    "version": "1.3.4",
     "private": true,
     "dependencies": {
         "@amelix/react-lottie": "^1.2.4",
