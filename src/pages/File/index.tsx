@@ -45,11 +45,11 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
   const downloadFile = async () => {
     await copyToWeb(`${data.location}`, `/${data.name}`);
     // @ts-ignore
-    const url = `${MDS.filehost}${getAppUID()}/${data.name}`;
+    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}/${data.name}`;
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'download';
+    link.download = data.name;
     link.target = '_blank';
     link.click();
   }
@@ -72,16 +72,9 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
-            {/* @ts-ignore */}
-            <button onClick={downloadFile} className="button">
+            <button onClick={downloadFile} className="button text-sm">
               Download
             </button>
-            {/* @ts-ignore */}
-            <a href={`${MDS.filehost}${getAppUID()}/${data.name}`} download>
-              <button className="button">
-                Download !
-              </button>
-            </a>
             <button onClick={deleteFile} className="button">
               Delete
             </button>
