@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import * as minima from '../../__minima__';
 import route from '../../assets/route.svg';
+import { copyToWeb, logDownload } from "../../__minima__";
+import { getAppUID } from "../../utilities";
 
 export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename, setDisplayCopyPath, display, close }: any) {
   const transition = useTransition(display, {
@@ -26,7 +28,19 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
   });
 
   const downloadFile = async () => {
-    await minima.downloadFile(data.file.location, data.file.name);
+    const filePath = `/downloads/${data.file.name}`;
+    await copyToWeb(`${data.file.location}`, filePath);
+    await logDownload(filePath);
+
+    // @ts-ignore
+    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = data.name;
+    link.target = '_blank';
+    link.click();
+
     close();
   };
 

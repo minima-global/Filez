@@ -225,4 +225,48 @@ export function copyToWeb(fileLocation: string, newFilePath: string) {
   });
 }
 
+export function deleteFromWeb(fileLocation: string) {
+  return new Promise((resolve, reject) => {
+    (window as any).MDS.file.deletefromweb(fileLocation, function (response: any) {
+      if (response.response) {
+        return resolve(response.response);
+      }
+
+      return reject();
+    });
+  });
+}
+
+export function logDownload(filePath: string) {
+  return new Promise((resolve) => {
+    try {
+      (window as any).MDS.sql(`INSERT INTO downloaded (file_path) VALUES ('${filePath}')`, function () {
+        return resolve(true);
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  });
+}
+
+export function getDownloads() {
+  return new Promise((resolve) => {
+    (window as any).MDS.sql(`SELECT * FROM downloaded`, function (response: any) {
+      if (response.status) {
+        return resolve(response.rows);
+      }
+
+      return resolve([]);
+    });
+  });
+}
+
+export function clearDownload(filePath: string) {
+  return new Promise((resolve) => {
+    (window as any).MDS.sql(`DELETE FROM downloaded WHERE file_path = '${filePath}'`, function () {
+      return resolve(true);
+    });
+  });
+}
+
 export default exports;

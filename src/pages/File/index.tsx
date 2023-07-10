@@ -5,7 +5,7 @@ import * as utilities from '../../utilities';
 import { appContext } from "../../AppContext";
 import checkCircleSvg from "../../assets/check_circle.svg";
 import Clipboard from "react-clipboard.js";
-import { copyToWeb } from "../../__minima__";
+import { copyToWeb, logDownload } from "../../__minima__";
 import { getAppUID } from "../../utilities";
 
 const File: any = ({ data, setDisplayDelete, close }: any) => {
@@ -43,9 +43,12 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
   };
 
   const downloadFile = async () => {
-    await copyToWeb(`${data.location}`, `/${data.name}`);
+    const filePath = `/downloads/${data.name}`;
+    await copyToWeb(`${data.location}`, filePath);
+    await logDownload(filePath);
+
     // @ts-ignore
-    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}/${data.name}`;
+    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
 
     const link = document.createElement('a');
     link.href = url;

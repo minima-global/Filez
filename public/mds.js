@@ -325,7 +325,19 @@ var MDS = {
 
             //Send via POST
             httpPostAsync(MDS.mainhost+"file?"+"uid="+MDS.minidappuid, commsline, callback);
-        }
+        },
+
+        /**
+         * Delete a file or folder from web folder
+         */
+        deletefromweb : function(file, callback){
+
+            //Create the single line
+            var commsline = "deletefromweb&"+file;
+
+            //Send via POST
+            httpPostAsync(MDS.mainhost+"file?"+"uid="+MDS.minidappuid, commsline, callback);
+        },
 
     },
 
