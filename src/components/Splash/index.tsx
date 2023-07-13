@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { useEffect } from 'react';
-// @ts-ignore, had to use different package due to official package  not supporting react 18
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import Lottie from '@amelix/react-lottie';
 import animationData from '../../splashAnimation.json';
 import useSplash from "../../hooks/useSplash";

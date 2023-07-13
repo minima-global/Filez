@@ -1,17 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { makeFolder, moveFile } from '../../__minima__';
 import { useFileList, useHelpers } from '../../hooks';
 import File from '../File';
 import { Menu, MoveItem, DeleteItem, RenameItem, MultipleMenu, CreateFolder, Notification } from '../../components';
 import { formatBytes } from '../../utilities';
 import CopyPath from '../../components/CopyPath';
-import axios from 'axios';
+import ErrorModal from '../../components/Error';
+import LoadingModal from '../../components/LoadingModal';
 
 const Home = () => {
+  const fileInput = useRef<HTMLInputElement>(null);
   const { title, previousPath, list, path, setPath, canonical, reloadDirectory } = useFileList(true);
   const { renderIcon } = useHelpers();
 
-  const [, setFile] = useState(false);
+  const [, setFile] = useState(undefined);
+  const [error, setError] = useState(false);
 
   const [displayFile, setDisplayFile] = useState(false);
   const [displayMove, setDisplayMove] = useState<any>(null);
@@ -24,6 +27,7 @@ const Home = () => {
   const [displayCopyPath, setDisplayCopyPath] = useState<any>(false);
 
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<any>(null);
@@ -37,6 +41,26 @@ const Home = () => {
   }, [path, list]);
 
   /**
+   * If upload takes too long, show error!
+   */
+  useEffect(() => {
+    if (uploading) {
+      const timeout = setTimeout(() => {
+        if (fileInput.current) {
+          (fileInput.current as any).value = null;
+        }
+
+        setUploading(false);
+        setError(true);
+      }, 180000);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [uploading]);
+
+  /**
    * Upload file if file was selected
    * @param evt
    * @returns {Promise<void>}
@@ -47,21 +71,27 @@ const Home = () => {
       setFile(file);
 
       if (file) {
-        const formData = new FormData();
-        formData.append('fileupload', file);
-        // @ts-ignore
-        formData.append('uid', MDS.minidappuid);
-        formData.append('jumppage', 'index.html');
-
         setUploading(true);
+        setProgress(null);
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        await axios.post(MDS.filehost + 'fileupload.html', formData);
-        await moveFile('/fileupload/' + file.name, path + '/' + file.name);
+        MDS.file.upload(file, async function (resp) {
+          if (resp.allchunks >= 10) {
+            setProgress(resp.chunk / resp.allchunks);
+          }
 
-        setUploading(false);
+          if (resp.allchunks === resp.chunk) {
+            setFile(undefined);
+            setUploading(false);
+            await moveFile('/fileupload/' + file.name, path + '/' + file.name);
+            reloadDirectory();
 
-        reloadDirectory();
+            if (fileInput.current) {
+              (fileInput.current as any).value = null;
+            }
+          }
+        });
       }
     } catch (e) {
       setUploading(false);
@@ -118,15 +148,23 @@ const Home = () => {
     }
 
     if (sort === 'ASC') {
-      orderedList = orderedList.sort((a: any, b: any) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() < b.name.toLowerCase() ? 1 : 0));
+      orderedList = orderedList.sort((a: any, b: any) =>
+        a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() < b.name.toLowerCase() ? 1 : 0
+      );
     }
 
     if (sort === 'DESC') {
-      orderedList = orderedList.sort((a: any, b: any) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() < b.name.toLowerCase() ? 1 : 0)).reverse();
+      orderedList = orderedList
+        .sort((a: any, b: any) =>
+          a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() < b.name.toLowerCase() ? 1 : 0
+        )
+        .reverse();
     }
 
     if (query !== '') {
-      orderedList = orderedList.filter((i: any) => (!query ? true : i.name.toLowerCase().includes(query.toLowerCase())));
+      orderedList = orderedList.filter((i: any) =>
+        !query ? true : i.name.toLowerCase().includes(query.toLowerCase())
+      );
     }
 
     return orderedList;
@@ -203,13 +241,8 @@ const Home = () => {
 
   return (
     <div>
-      {uploading && (
-        <div className="absolute w-full h-full bg-black bg-opacity-30 left-0 top-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg box-shadow-md p-5 flex flex-col justify-center">
-            <div className="spinner-border block mx-auto" />
-          </div>
-        </div>
-      )}
+      <LoadingModal display={uploading} progress={progress} />
+      <ErrorModal display={error} dismiss={() => setError(false)} />
       <MoveItem data={displayMove} display={!!displayMove} close={hideMove} callback={reloadDirectory} />
       <Menu
         data={displayMenu}
@@ -221,23 +254,55 @@ const Home = () => {
         displayCopyPath={displayCopyPath}
         setDisplayCopyPath={setDisplayCopyPath}
       />
-      <MultipleMenu data={displayMultipleMenu} display={!!displayMultipleMenu} setDisplayMove={setDisplayMove} setDisplayDelete={setDisplayDelete} close={hideMultipleMenu} />
-      <CreateFolder display={displayCreateFolder} close={hideCreateFolder} createFolder={createFolder} callback={reloadDirectory} />
+      <MultipleMenu
+        data={displayMultipleMenu}
+        display={!!displayMultipleMenu}
+        setDisplayMove={setDisplayMove}
+        setDisplayDelete={setDisplayDelete}
+        close={hideMultipleMenu}
+      />
+      <CreateFolder
+        display={displayCreateFolder}
+        close={hideCreateFolder}
+        createFolder={createFolder}
+        callback={reloadDirectory}
+      />
       <DeleteItem data={displayDelete} display={!!displayDelete} close={hideDelete} callback={reloadDirectory} />
       <RenameItem data={displayRename} display={!!displayRename} close={hideRename} callback={reloadDirectory} />
       <CopyPath data={displayCopyPath} display={!!displayCopyPath} close={() => setDisplayCopyPath(false)} />
       <div>
         <div className="grid grid-cols-2 p-5">
           <div className="col-span-1 flex items-center">
-            <div onClick={() => (previousPath ? setPath(previousPath) : null)} className={`cursor-pointer flex items-center ${previousPath ? '' : 'opacity-0'}`}>
-              <svg className="mr-5" width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9.99953 19.6534L0.345703 9.99953L9.99953 0.345703L11.4187 1.7649L3.18413 9.99953L11.4187 18.2342L9.99953 19.6534Z" fill="#1C1B1F" />
+            <div
+              onClick={() => (previousPath ? setPath(previousPath) : null)}
+              className={`cursor-pointer flex items-center ${previousPath ? '' : 'opacity-0'}`}
+            >
+              <svg
+                className="mr-5"
+                width="12"
+                height="20"
+                viewBox="0 0 12 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.99953 19.6534L0.345703 9.99953L9.99953 0.345703L11.4187 1.7649L3.18413 9.99953L11.4187 18.2342L9.99953 19.6534Z"
+                  fill="#1C1B1F"
+                />
               </svg>
               Back
             </div>
           </div>
           <div className="col-span-1 flex items-center justify-end gap-5">
-            <svg onClick={showSearch} className="cursor-pointer" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              onClick={showSearch}
+              className="cursor-pointer"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M16.1384 17.1923L9.85765 10.9115C9.35765 11.3243 8.78265 11.6474 8.13265 11.8807C7.48265 12.114 6.81022 12.2307 6.11535 12.2307C4.40618 12.2307 2.95967 11.6389 1.7758 10.4554C0.591933 9.27178 0 7.82564 0 6.11693C0 4.40819 0.591784 2.96152 1.77535 1.7769C2.95892 0.5923 4.40507 0 6.1138 0C7.82252 0 9.26918 0.591933 10.4538 1.7758C11.6384 2.95967 12.2307 4.40618 12.2307 6.11535C12.2307 6.82945 12.1109 7.5115 11.8711 8.1615C11.6314 8.8115 11.3115 9.37689 10.9115 9.85765L17.1922 16.1384L16.1384 17.1923ZM6.11535 10.7308C7.40382 10.7308 8.49517 10.2836 9.3894 9.3894C10.2836 8.49517 10.7308 7.40382 10.7308 6.11535C10.7308 4.82688 10.2836 3.73553 9.3894 2.8413C8.49517 1.94707 7.40382 1.49995 6.11535 1.49995C4.82688 1.49995 3.73553 1.94707 2.8413 2.8413C1.94708 3.73553 1.49998 4.82688 1.49998 6.11535C1.49998 7.40382 1.94708 8.49517 2.8413 9.3894C3.73553 10.2836 4.82688 10.7308 6.11535 10.7308Z"
                 fill="#08090B"
@@ -252,17 +317,38 @@ const Home = () => {
           <div className="search-bar p-3 flex items-center">
             <div className="search-bar__input flex-grow">
               <label className="flex items-center justify-center">
-                <svg className="search-bar__icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  className="search-bar__icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M16.1384 17.1923L9.85765 10.9115C9.35765 11.3243 8.78265 11.6474 8.13265 11.8807C7.48265 12.114 6.81022 12.2307 6.11535 12.2307C4.40618 12.2307 2.95967 11.6389 1.7758 10.4554C0.591933 9.27178 0 7.82564 0 6.11693C0 4.40819 0.591784 2.96152 1.77535 1.7769C2.95892 0.5923 4.40507 0 6.1138 0C7.82252 0 9.26918 0.591933 10.4538 1.7758C11.6384 2.95967 12.2307 4.40618 12.2307 6.11535C12.2307 6.82945 12.1109 7.5115 11.8711 8.1615C11.6314 8.8115 11.3115 9.37688 10.9115 9.85765L17.1922 16.1384L16.1384 17.1923ZM6.11535 10.7308C7.40382 10.7308 8.49517 10.2836 9.3894 9.3894C10.2836 8.49517 10.7308 7.40382 10.7308 6.11535C10.7308 4.82688 10.2836 3.73553 9.3894 2.8413C8.49517 1.94707 7.40382 1.49995 6.11535 1.49995C4.82688 1.49995 3.73553 1.94707 2.8413 2.8413C1.94708 3.73553 1.49998 4.82688 1.49998 6.11535C1.49998 7.40382 1.94708 8.49517 2.8413 9.3894C3.73553 10.2836 4.82688 10.7308 6.11535 10.7308Z"
                     fill="#08090B"
                   />
                 </svg>
-                <input type="text" className="search-bar__input-item" placeholder={`Search ${title.toLowerCase()}`} value={query} onChange={handleSearch} />
+                <input
+                  type="text"
+                  className="search-bar__input-item"
+                  placeholder={`Search ${title.toLowerCase()}`}
+                  value={query}
+                  onChange={handleSearch}
+                />
               </label>
             </div>
             <div className="ml-3">
-              <svg onClick={hideSearch} className="cursor-pointer" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                onClick={hideSearch}
+                className="cursor-pointer"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   d="M6.39998 14.6538L9.99998 11.0538L13.6 14.6538L14.6538 13.6L11.0538 9.99998L14.6538 6.39998L13.6 5.34615L9.99998 8.94615L6.39998 5.34615L5.34615 6.39998L8.94615 9.99998L5.34615 13.6L6.39998 14.6538ZM10.0016 19.5C8.68772 19.5 7.45268 19.2506 6.29655 18.752C5.1404 18.2533 4.13472 17.5765 3.2795 16.7217C2.42427 15.8669 1.74721 14.8616 1.24833 13.706C0.749442 12.5504 0.5 11.3156 0.5 10.0017C0.5 8.68772 0.749334 7.45268 1.248 6.29655C1.74667 5.1404 2.42342 4.13472 3.27825 3.2795C4.1331 2.42427 5.13834 1.74721 6.29398 1.24833C7.44959 0.749442 8.68437 0.5 9.9983 0.5C11.3122 0.5 12.5473 0.749333 13.7034 1.248C14.8596 1.74667 15.8652 2.42342 16.7205 3.27825C17.5757 4.1331 18.2527 5.13834 18.7516 6.29398C19.2505 7.44959 19.5 8.68437 19.5 9.9983C19.5 11.3122 19.2506 12.5473 18.752 13.7034C18.2533 14.8596 17.5765 15.8652 16.7217 16.7205C15.8669 17.5757 14.8616 18.2527 13.706 18.7516C12.5504 19.2505 11.3156 19.5 10.0016 19.5Z"
                   fill="white"
@@ -275,7 +361,12 @@ const Home = () => {
           <div className="flex gap-2 pl-5 pr-5 pb-2">
             <label className="button cursor-pointer">
               Upload file
-              <input type="file" onChange={handleFileOnChange} className="button hidden" />
+              <input
+                type="file"
+                ref={fileInput}
+                onChange={handleFileOnChange}
+                className="button hidden"
+              />
             </label>
             <button onClick={showCreateFolder} className="button">
               Create folder
@@ -296,11 +387,20 @@ const Home = () => {
           <div className="flex items-center p-5">
             {!noFiles && (
               <div className="mr-4">
-                <input type="checkbox" className="checkbox" readOnly checked={list ? list.length === checked.length : false} onClick={toggleAll} />
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  readOnly
+                  checked={list ? list.length === checked.length : false}
+                  onClick={toggleAll}
+                />
               </div>
             )}
             <span className="mr-3">Name</span>
-            <div className={`transition-transform cursor-pointer ${sort === 'ASC' ? 'rotate-180' : ''}`} onClick={() => setSort(sort === 'DESC' || !sort ? 'ASC' : 'DESC')}>
+            <div
+              className={`transition-transform cursor-pointer ${sort === 'ASC' ? 'rotate-180' : ''}`}
+              onClick={() => setSort(sort === 'DESC' || !sort ? 'ASC' : 'DESC')}
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M7.99988 0.384535L15.6152 7.99988L14.5614 9.06908L8.74986 3.25754L8.74986 15.6152L7.24991 15.6152L7.24991 3.25754L1.43836 9.06909L0.384533 7.99989L7.99988 0.384535Z"
@@ -319,14 +419,31 @@ const Home = () => {
               }
 
               return (
-                <div key={file.name} className={`item cursor-pointer flex items-center p-1 ${checked.includes(file.location) ? 'item__selected' : ''}`}>
+                <div
+                  key={file.name}
+                  className={`item cursor-pointer flex items-center p-1 ${
+                    checked.includes(file.location) ? 'item__selected' : ''
+                  }`}
+                >
                   <div className="flex items-center pr-5">
-                    <input type="checkbox" className="checkbox" readOnly checked={checked.includes(file.location)} onClick={() => toggleChecked(file)} />
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      readOnly
+                      checked={checked.includes(file.location)}
+                      onClick={() => toggleChecked(file)}
+                    />
                   </div>
-                  <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="pr-5">
+                  <div
+                    onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))}
+                    className="pr-5"
+                  >
                     {renderIcon(file)}
                   </div>
-                  <div onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))} className="flex-grow text-overflow">
+                  <div
+                    onClick={() => (file.isdir ? setPath(canonical + '/' + file.name) : setDisplayFile(file))}
+                    className="flex-grow text-overflow"
+                  >
                     <div className="w-full text-overflow pr-5">{file.name}</div>
                     {!file.isdir && <div className="text-custom-grey text-sm">{formatBytes(file.size)}</div>}
                   </div>

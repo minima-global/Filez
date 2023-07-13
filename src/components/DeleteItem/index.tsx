@@ -1,12 +1,10 @@
-import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import { deleteFile } from '../../__minima__';
 import { modalAnimation } from '../../animations';
 
 export function DeleteItem({ display, data, close, callback }: any) {
   const multiple = Array.isArray(data);
-
-  const transition = useTransition(display, modalAnimation);
+  const transition: any = useTransition(display, modalAnimation as any);
 
   const handleOnSubmit = async (evt: any) => {
     evt.preventDefault();

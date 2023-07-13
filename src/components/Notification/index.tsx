@@ -1,7 +1,6 @@
-import * as React from 'react';
 import { useContext, useEffect } from 'react';
 import { appContext } from '../../AppContext';
-import { sanitize } from 'dompurify';
+import dompurify from 'dompurify';
 
 export const Notification = () => {
   const { _notification, dismissNotification } = useContext(appContext);
@@ -29,7 +28,7 @@ export const Notification = () => {
           fill="white"
         />
       </svg>
-      <span className="ml-3" dangerouslySetInnerHTML={{ __html: sanitize(_notification.message) }}></span>
+      <span className="ml-3" dangerouslySetInnerHTML={{ __html: dompurify.sanitize(_notification.message) }}></span>
     </div>
   );
 };

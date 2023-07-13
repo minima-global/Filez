@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import { renameFile } from '../../__minima__';
 import { useContext, useEffect, useState } from 'react';

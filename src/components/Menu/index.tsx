@@ -1,6 +1,4 @@
-import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
-import * as minima from '../../__minima__';
 import route from '../../assets/route.svg';
 import { copyToWeb, logDownload } from "../../__minima__";
 import { getAppUID } from "../../utilities";
@@ -25,7 +23,7 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
     config: {
       duration: 100,
     },
-  });
+  } as any);
 
   const downloadFile = async () => {
     const filePath = `/downloads/${data.file.name}`;

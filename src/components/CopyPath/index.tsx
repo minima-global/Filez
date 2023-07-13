@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Clipboard from 'react-clipboard.js';
 import { useContext, useEffect, useState } from "react";
 import { useTransition, animated } from '@react-spring/web';
@@ -8,7 +7,7 @@ import checkCircleSvg from '../../assets/check_circle.svg';
 
 export function CopyPath({ display, data, close }: any) {
   const { fullPath } = useContext(appContext);
-  const transition = useTransition(display, modalAnimation);
+  const transition = useTransition(display, modalAnimation as any);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {

@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function useHelpers() {
   const renderIcon = (file: any) => {
     switch (true) {

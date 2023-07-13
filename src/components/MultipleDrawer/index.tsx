@@ -1,9 +1,8 @@
-import * as React from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import { drawerAnimation } from '../../animations';
 
 export function MultipleMenu({ data, setDisplayDelete, setDisplayMove, display, close }: any) {
-  const transition = useTransition(display, drawerAnimation);
+  const transition = useTransition(display, drawerAnimation as any);
 
   const deleteItem = () => {
     close();
