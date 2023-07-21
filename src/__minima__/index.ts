@@ -237,6 +237,18 @@ export function deleteFromWeb(fileLocation: string) {
   });
 }
 
+export function getPath(fileName: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    (window as any).MDS.file.getpath(fileName, function (response: any) {
+      if (response.response) {
+        return resolve(response.response);
+      }
+
+      return reject();
+    });
+  });
+}
+
 export function logDownload(filePath: string) {
   return new Promise((resolve) => {
     try {

@@ -1,10 +1,12 @@
 import { useTransition, animated } from '@react-spring/web';
 import route from '../../assets/route.svg';
-import { copyToWeb, logDownload } from "../../__minima__";
+import share from '../../assets/share.svg';
+import { copyToWeb, getPath, logDownload } from "../../__minima__";
 import { getAppUID } from "../../utilities";
+import { isMinimaBrowser } from "../../env";
 
 export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename, setDisplayCopyPath, display, close }: any) {
-  const transition = useTransition(display, {
+  const transition: any = useTransition(display, {
     from: {
       y: '20%',
       scale: 1,
@@ -30,6 +32,7 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
     await copyToWeb(`${data.file.location}`, filePath);
     await logDownload(filePath);
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
 
@@ -61,6 +64,11 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
     close();
     setDisplayCopyPath(data);
   };
+
+  const shareFile = async () => {
+    const path = await getPath(data.file.location);
+    Android.shareFile(path.getpath.path, "*/*");
+  }
 
   return (
     <div>
@@ -120,6 +128,16 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
                           <span className="pl-4">File path</span>
                         </div>
                       </div>
+                      {isMinimaBrowser && (
+                        <div onClick={shareFile} className="cursor-pointer grid grid-cols-12 mb-5">
+                          <div className="col-span-1">
+                            <img src={share} alt="Share" />
+                          </div>
+                          <div className="col-span-10 text-left flex items-center">
+                            <span className="pl-4">Share</span>
+                          </div>
+                        </div>
+                      )}
                       <div onClick={renameItem} className="cursor-pointer grid grid-cols-12 mb-8">
                         <div className="col-span-1">
                           <svg width="26" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
