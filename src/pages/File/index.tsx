@@ -46,6 +46,8 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
     await copyToWeb(`${data.location}`, filePath);
     await logDownload(filePath);
 
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     // @ts-ignore
     const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
 
@@ -74,7 +76,7 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
-            <button onClick={downloadFile} className="button text-sm">
+            <button onClick={downloadFile} className="button">
               Download
             </button>
             <button onClick={deleteFile} className="button">
