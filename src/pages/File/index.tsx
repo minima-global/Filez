@@ -46,8 +46,6 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
     await copyToWeb(`${data.location}`, filePath);
     await logDownload(filePath);
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     // @ts-ignore
     const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
 

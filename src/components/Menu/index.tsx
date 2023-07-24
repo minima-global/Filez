@@ -32,8 +32,6 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
     await copyToWeb(`${data.file.location}`, filePath);
     await logDownload(filePath);
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}`;
