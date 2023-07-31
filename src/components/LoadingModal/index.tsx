@@ -1,9 +1,15 @@
+import { FC } from "react";
 import { useTransition, animated } from '@react-spring/web';
 import { modalAnimation } from '../../animations';
 import loadingSpinner from '../../spinner.json';
 import Lottie from '@amelix/react-lottie';
 
-export function LoadingModal({ display, progress }: any) {
+type LoadingModalProps ={
+  display: boolean;
+  progress: number;
+}
+
+export const LoadingModal: FC<LoadingModalProps> = ({ display, progress }: LoadingModalProps) => {
   const transition: any = useTransition(display, modalAnimation as any);
 
   const defaultOptions = {
@@ -32,12 +38,13 @@ export function LoadingModal({ display, progress }: any) {
                     </div>
                   </div>
                 </div>
+                {/* As any because of issues with typing */}
                 {progress && (
                   <div className="border-2 border-black h-[36px] mt-6 relative">
                     <div className="absolute blend z-10 left-[6px] top-[6px] font-black text-sm">{(Number(progress) * 100).toFixed(0)}%</div>
                     <div className="bg-black absolute w-full h-[36px] transition-all origin-left" style={{ transform: `scaleX(${progress})`, left: '-1px', top: '-2px', width: 'calc(100% + 1px)' }}></div>
                   </div>
-                )}
+                ) as any}
                 <div onClick={() => window.location.reload()} className="cursor-pointer border-b w-fit mx-auto border-b-black pb-0.5 mt-6 mb-2">
                   Cancel
                 </div>
