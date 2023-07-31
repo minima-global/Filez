@@ -1,6 +1,6 @@
 {
     "name": "filez",
-    "version": "1.6.5",
+    "version": "1.7.0",
     "private": true,
     "description": "Simple file manager",
     "type": "module",
