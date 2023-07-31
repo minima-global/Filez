@@ -6,7 +6,7 @@ import Lottie from '@amelix/react-lottie';
 
 type LoadingModalProps ={
   display: boolean;
-  progress: number;
+  progress: number | null;
 }
 
 export const LoadingModal: FC<LoadingModalProps> = ({ display, progress }: LoadingModalProps) => {

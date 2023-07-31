@@ -43,7 +43,7 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
 
   const downloadFile = async () => {
     const filePath = `/downloads/${data.name}`;
-    await copyToWeb(`${data.location}`, filePath);
+    const copied = await copyToWeb(`${data.location}`, filePath);
     await logDownload(filePath);
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -53,8 +53,15 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
     const link = document.createElement('a');
     link.href = url;
     link.download = data.name;
-    link.target = '_blank';
+
+    console.log('copied data', copied);
+    console.log('downloading from:', url);
+
+    console.log('added link to dom');
+    document.body.appendChild(link);
     link.click();
+    console.log('removed link to dom');
+    document.body.removeChild(link);
   }
 
   return (
