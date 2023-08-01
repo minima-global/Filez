@@ -12,7 +12,7 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   });
   const [root, setRoot] = useState('');
   const [pathname, setPathname] = useState<string | null>(null);
-  const fullPath = root + (!!pathname ? `/mds/data/${pathname}/file` : '');
+  const fullPath = root + (pathname ? `/mds/data/${pathname}/file` : '');
 
   useEffect(() => {
     getStatus().then((response: any) => {

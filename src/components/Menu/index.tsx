@@ -1,9 +1,9 @@
 import { useTransition, animated } from '@react-spring/web';
 import route from '../../assets/route.svg';
 import share from '../../assets/share.svg';
-import { copyToWeb, getPath, logDownload } from "../../__minima__";
-import { getAppUID } from "../../utilities";
+import { getPath } from "../../__minima__";
 import { isMinimaBrowser } from "../../env";
+import * as minima from "../../__minima__";
 
 export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename, setDisplayCopyPath, display, close }: any) {
   const transition: any = useTransition(display, {
@@ -28,27 +28,7 @@ export function Menu({ data, setDisplayDelete, setDisplayMove, setDisplayRename,
   } as any);
 
   const downloadFile = async () => {
-    const filePath = `/downloads/${data.file.name}`;
-    const copied = await copyToWeb(`${data.file.location}`, filePath);
-    await logDownload(filePath);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}?uid=${MDS.minidappuid}`;
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = data.file.name;
-
-    console.log('copied data', copied);
-    console.log('downloading from:', url);
-
-    console.log('added link to dom');
-    document.body.appendChild(link);
-    link.click();
-    console.log('removed link to dom');
-    document.body.removeChild(link);
-
+    await minima.downloadFile(data.file.location, data.file.name);
     close();
   };
 

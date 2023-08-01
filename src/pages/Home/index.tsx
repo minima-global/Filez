@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { makeFolder, moveFile } from '../../__minima__';
 import { useFileList, useHelpers } from '../../hooks';
 import File from '../File';
@@ -7,24 +7,25 @@ import { formatBytes } from '../../utilities';
 import CopyPath from '../../components/CopyPath';
 import ErrorModal from '../../components/Error';
 import LoadingModal from '../../components/LoadingModal';
+import { MinimaFile } from "../../types";
 
 const Home = () => {
-  const fileInput = useRef<HTMLInputElement>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
   const { title, previousPath, list, path, setPath, canonical, reloadDirectory } = useFileList(true);
   const { renderIcon } = useHelpers();
 
   const [, setFile] = useState(undefined);
   const [error, setError] = useState(false);
 
-  const [displayFile, setDisplayFile] = useState(false);
-  const [displayMove, setDisplayMove] = useState<any>(null);
+  const [displayFile, setDisplayFile] = useState<MinimaFile | false>(false);
+  const [displayMove, setDisplayMove] = useState<{ file: MinimaFile, path: string } | string[] | false>(false);
   const [displaySearch, setDisplaySearch] = useState(false);
-  const [displayMenu, setDisplayMenu] = useState<any>(false);
-  const [displayRename, setDisplayRename] = useState<any>(null);
-  const [displayDelete, setDisplayDelete] = useState<any>(false);
+  const [displayMenu, setDisplayMenu] = useState<{ file: MinimaFile, path: string } | string[] | false>(false);
+  const [displayRename, setDisplayRename] = useState<boolean | null>(null);
+  const [displayDelete, setDisplayDelete] = useState<{ file: MinimaFile, path?: string } | string[] | false>(false);
   const [displayCreateFolder, setDisplayCreateFolder] = useState(false);
-  const [displayMultipleMenu, setDisplayMultipleMenu] = useState<any>(false);
-  const [displayCopyPath, setDisplayCopyPath] = useState<any>(false);
+  const [displayMultipleMenu, setDisplayMultipleMenu] = useState<string[] | false>(false);
+  const [displayCopyPath, setDisplayCopyPath] = useState<MinimaFile | false>(false);
 
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);

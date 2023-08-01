@@ -3,11 +3,19 @@ import { useTransition, animated } from '@react-spring/web';
 import { renameFile } from '../../__minima__';
 import { modalAnimation } from '../../animations';
 import { useHelpers, useFileList } from '../../hooks';
+import { MinimaFile } from '../../types';
 
-export function MoveItem({ display, data, close, callback }: any) {
+type MoveItemProps = {
+  display: boolean;
+  data: { file: MinimaFile, path: string } | string[] | false;
+  callback: () => void;
+  close: () => void;
+};
+
+export function MoveItem({ display, data, close, callback }: MoveItemProps) {
+  const transition: any = useTransition(display, modalAnimation as any);
   const { list, canonical, title, previousPath, setPath } = useFileList(display);
   const { renderIcon } = useHelpers();
-  const multiple = Array.isArray(data);
 
   /**
    * Reset path back to root if the modal is opened
@@ -18,17 +26,15 @@ export function MoveItem({ display, data, close, callback }: any) {
     }
   }, [display, setPath]);
 
-  const transition = useTransition(display, modalAnimation);
-
   const handleOnSubmit = async (evt: any) => {
     evt.preventDefault();
 
-    if (multiple) {
+    if (Array.isArray(data)) {
       for (const file of data) {
-        const filename = file.split("/").pop();
+        const filename = file.split('/').pop();
         await renameFile(file, canonical + '/' + filename);
       }
-    } else {
+    } else if (data) {
       await renameFile(data.file.location, canonical + '/' + data.file.name);
     }
 
@@ -63,8 +69,18 @@ export function MoveItem({ display, data, close, callback }: any) {
                             'Files'
                           ) : (
                             <div onClick={goBack} className="flex items-center">
-                              <svg className="mr-4" width="10" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10.4995 19.6534L0.845703 9.99953L10.4995 0.345703L11.9187 1.7649L3.68413 9.99953L11.9187 18.2342L10.4995 19.6534Z" fill="white" />
+                              <svg
+                                className="mr-4"
+                                width="10"
+                                height="20"
+                                viewBox="0 0 12 20"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M10.4995 19.6534L0.845703 9.99953L10.4995 0.345703L11.9187 1.7649L3.68413 9.99953L11.9187 18.2342L10.4995 19.6534Z"
+                                  fill="white"
+                                />
                               </svg>
                               <span className="text-overflow">{title}</span>
                             </div>
@@ -73,16 +89,28 @@ export function MoveItem({ display, data, close, callback }: any) {
                         <div className="border border-black mb-4 file-list">
                           <ul className="pb-1">
                             {list &&
-                              list.sort((a: any, b: any) => b.isdir - a.isdir).map((folder: any) => (
-                                <li key={folder.name} onClick={() => changePath(folder)} className={`flex items-center p-3 ${folder.isdir ? 'cursor-pointer' : 'opacity-50'}`}>
-                                  <span className="mr-3">{renderIcon(folder)}</span> <span className="text-overflow">{folder.name}</span>
-                                </li>
-                              ))}
+                              list
+                                .sort((a: any, b: any) => b.isdir - a.isdir)
+                                .map((folder: any) => (
+                                  <li
+                                    key={folder.name}
+                                    onClick={() => changePath(folder)}
+                                    className={`flex items-center p-3 ${
+                                      folder.isdir ? 'cursor-pointer' : 'opacity-50'
+                                    }`}
+                                  >
+                                    <span className="mr-3">{renderIcon(folder)}</span>{' '}
+                                    <span className="text-overflow">{folder.name}</span>
+                                  </li>
+                                ))}
                           </ul>
                         </div>
                         <div className="text-center">
                           <button className="button button--thick w-full">Move here</button>
-                          <div onClick={close} className="cursor-pointer mt-5 border-b w-fit mx-auto border-b-black pb-0.5">
+                          <div
+                            onClick={close}
+                            className="cursor-pointer mt-5 border-b w-fit mx-auto border-b-black pb-0.5"
+                          >
                             Cancel
                           </div>
                         </div>

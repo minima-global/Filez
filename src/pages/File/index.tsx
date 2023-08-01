@@ -1,13 +1,18 @@
-import { useContext, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useContext, useEffect, useState } from "react";
 import * as minima from '../../__minima__';
 import * as utilities from '../../utilities';
 import { appContext } from "../../AppContext";
 import checkCircleSvg from "../../assets/check_circle.svg";
 import Clipboard from "react-clipboard.js";
-import { copyToWeb, logDownload } from "../../__minima__";
-import { getAppUID } from "../../utilities";
+import { MinimaFile } from "../../types";
 
-const File: any = ({ data, setDisplayDelete, close }: any) => {
+type FileProps = {
+  data: MinimaFile;
+  setDisplayDelete: Dispatch<SetStateAction<{ file: MinimaFile; path?: string; } | string[] | false>>;
+  close: () => void;
+}
+
+const File: FC<FileProps> = ({ data, setDisplayDelete, close }) => {
   const { fullPath } = useContext(appContext);
   const [image, setImage] = useState<any>(null);
   const fileSize = utilities.formatBytes(data.size);
@@ -41,27 +46,8 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
     setDisplayDelete({ file: data });
   };
 
-  const downloadFile = async () => {
-    const filePath = `/downloads/${data.name}`;
-    const copied = await copyToWeb(`${data.location}`, filePath);
-    await logDownload(filePath);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const url = `${MDS.filehost.replace('localhost', '127.0.0.1')}${getAppUID()}${filePath}?uid=${MDS.minidappuid}`;
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = data.name;
-
-    console.log('copied data', copied);
-    console.log('downloading from:', url);
-
-    console.log('added link to dom');
-    document.body.appendChild(link);
-    link.click();
-    console.log('removed link to dom');
-    document.body.removeChild(link);
+  const triggerDownload = () => {
+    minima.downloadFile(data.location, data.name);
   }
 
   return (
@@ -82,7 +68,7 @@ const File: any = ({ data, setDisplayDelete, close }: any) => {
         </div>
         <div className="border-b-2 border-b-black">
           <div className="flex gap-3 items-center p-5">
-            <button onClick={downloadFile} className="button">
+            <button onClick={triggerDownload} className="button">
               Download
             </button>
             <button onClick={deleteFile} className="button">

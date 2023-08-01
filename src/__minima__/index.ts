@@ -1,3 +1,5 @@
+import { isMinimaBrowser } from "../env";
+
 export function maximaSetName(name: string) {
   return new Promise((resolve, reject) => {
     (window as any).MDS.cmd(`maxima action:setname name:${name}`, function (response: any) {
@@ -130,28 +132,29 @@ export function loadBinary(fileName: string) {
   });
 }
 
-export function downloadFile(path: string, name: string) {
+export function downloadFile(path: string, downloadName: string) {
   return new Promise((resolve, reject) => {
     (window as any).MDS.file.loadbinary(path, function (msg: any) {
       try {
-        var filedata = msg.response.load.data.substring(2);
-        var b64 = (window as any).MDS.util.hexToBase64(filedata);
-        var binaryData = (window as any).MDS.util.base64ToArrayBuffer(b64);
-        var blob = new Blob([binaryData], { type: 'application/octet-stream' });
+        const filedata = msg.response.load.data.substring(2);
+        const b64 = (window as any).MDS.util.hexToBase64(filedata);
+        const binaryData = (window as any).MDS.util.base64ToArrayBuffer(b64);
+        const blob = new Blob([binaryData], { type: 'application/octet-stream' });
 
-        var url = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
 
         // webview download support
-        if (window.navigator.userAgent.includes("Minima Browser")) {
+        if (isMinimaBrowser) {
 
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          return Android.blobDownload(name, filedata);
+          return Android.fileDownload(MDS.minidappuid, path);
         }
 
         // Create a link element
-        var link = document.createElement('a');
+        const link = document.createElement('a');
         link.href = url;
-        link.download = name;
+        link.download = downloadName;
         document.body.appendChild(link);
         link.click();
 
