@@ -134,23 +134,25 @@ export function loadBinary(fileName: string) {
 
 export function downloadFile(path: string, downloadName: string) {
   return new Promise((resolve, reject) => {
-    (window as any).MDS.file.loadbinary(path, function (msg: any) {
+    // webview download support
+    // do not load binary
+    if (isMinimaBrowser) {
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      Android.fileDownload(MDS.minidappuid, path);
+      return resolve(true);
+    }
+
+    MDS.file.loadbinary(path, function (msg: any) {
       try {
+
         const filedata = msg.response.load.data.substring(2);
-        const b64 = (window as any).MDS.util.hexToBase64(filedata);
-        const binaryData = (window as any).MDS.util.base64ToArrayBuffer(b64);
+        const b64 = MDS.util.hexToBase64(filedata);
+        const binaryData = MDS.util.base64ToArrayBuffer(b64);
         const blob = new Blob([binaryData], { type: 'application/octet-stream' });
 
         const url = URL.createObjectURL(blob);
-
-        // webview download support
-        if (isMinimaBrowser) {
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          Android.fileDownload(MDS.minidappuid, path);
-          return resolve(true);
-        }
 
         // Create a link element
         const link = document.createElement('a');
