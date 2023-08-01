@@ -148,7 +148,8 @@ export function downloadFile(path: string, downloadName: string) {
 
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          return Android.fileDownload(MDS.minidappuid, path);
+          Android.fileDownload(MDS.minidappuid, path);
+          return resolve(true);
         }
 
         // Create a link element
