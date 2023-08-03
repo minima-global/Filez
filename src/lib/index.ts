@@ -1,7 +1,11 @@
-export function promisfy(fn: any, command: string, arg: any = undefined): any {
+export function promisify(fn: any, command: string, arg: any = undefined, raw = false): any {
   return new Promise((resolve) => {
     if (arg) {
       fn(command, arg, function (response: any) {
+        if (raw) {
+          return resolve(response);
+        }
+
         if (response.status) {
           return resolve(response.response);
         }
@@ -10,6 +14,10 @@ export function promisfy(fn: any, command: string, arg: any = undefined): any {
       });
     } else {
       fn(command, function (response: any) {
+        if (raw) {
+          return resolve(response);
+        }
+
         if (response.status) {
           return resolve(response.response);
         }
@@ -20,14 +28,22 @@ export function promisfy(fn: any, command: string, arg: any = undefined): any {
   });
 }
 
+export function set(key: string, value: string) {
+  return promisify(MDS.keypair.set, key, value, true);
+}
+
+export function get(key: string) {
+  return promisify(MDS.keypair.get, key, undefined, true);
+}
+
 export function deleteFile(fileName: string) {
-  return promisfy((window as any).MDS.file.delete, fileName);
+  return promisify((window as any).MDS.file.delete, fileName);
 }
 
 export function loadFile(fileName: string) {
-  return promisfy((window as any).MDS.file.load, fileName);
+  return promisify((window as any).MDS.file.load, fileName);
 }
 
 export function saveFile(fileName: string, arg: string | object) {
-  return promisfy((window as any).MDS.file.save, fileName, arg);
+  return promisify((window as any).MDS.file.save, fileName, arg);
 }

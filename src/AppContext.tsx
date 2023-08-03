@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { createContext, useEffect, useState } from "react";
-import { getStatus } from "./__minima__";
+import { clearDownload, deleteFromWeb, getDownloads, getStatus } from "./__minima__";
+import { get, set } from "./lib";
 
 export const appContext = createContext({} as any);
 
@@ -13,12 +14,47 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [root, setRoot] = useState('');
   const [pathname, setPathname] = useState<string | null>(null);
   const fullPath = root + (pathname ? `/mds/data/${pathname}/file` : '');
+  const [showHiddenItems, setShowHiddenItems] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!loaded) {
+      setLoaded(true);
+
+      (window as any).MDS.init((msg: any) => {
+        if (msg.event === 'inited') {
+          get('SHOW_HIDDEN_FILES').then(function(response) {
+            if (response.value === '1') {
+              setShowHiddenItems(true);
+            }
+          });
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          MDS.sql('CREATE TABLE IF NOT EXISTS downloaded (id bigint auto_increment,file_path varchar(2048) NOT NULL)', function() {
+            getDownloads().then(async (downloads: any) => {
+              for (const file of downloads) {
+                await deleteFromWeb(file.FILE_PATH);
+                await clearDownload(file.FILE_PATH);
+              }
+            })
+          });
+        }
+      });
+    }
+  }, [loaded]);
 
   useEffect(() => {
     getStatus().then((response: any) => {
       setRoot(response.data);
     })
   }, []);
+
+  useEffect(() => {
+      if (loaded) {
+        set('SHOW_HIDDEN_FILES', showHiddenItems ? '1' : '0')
+      }
+  }, [showHiddenItems]);
 
   useEffect(() => {
     try {
@@ -47,8 +83,12 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     pathname,
     fullPath,
     _notification,
+    loaded,
+    setLoaded,
     promptNotification,
     dismissNotification,
+    showHiddenItems,
+    setShowHiddenItems,
   };
 
   return <appContext.Provider value={value}>{children}</appContext.Provider>;

@@ -1,19 +1,21 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useTransition, animated } from '@react-spring/web';
 import { renameFile } from '../../__minima__';
 import { modalAnimation } from '../../animations';
 import { useHelpers, useFileList } from '../../hooks';
 import { MinimaFile } from '../../types';
+import { appContext } from '../../AppContext';
 
 type MoveItemProps = {
   display: boolean;
-  data: { file: MinimaFile, path: string } | string[] | false;
+  data: { file: MinimaFile; path: string } | string[] | false;
   callback: () => void;
   close: () => void;
 };
 
 export function MoveItem({ display, data, close, callback }: MoveItemProps) {
   const transition: any = useTransition(display, modalAnimation as any);
+  const { showHiddenItems } = useContext(appContext);
   const { list, canonical, title, previousPath, setPath } = useFileList(display);
   const { renderIcon } = useHelpers();
 
@@ -92,7 +94,7 @@ export function MoveItem({ display, data, close, callback }: MoveItemProps) {
                               list
                                 .sort((a: any, b: any) => b.isdir - a.isdir)
                                 .filter((f) => {
-                                  if (f.location === '/fileupload') {
+                                  if (!showHiddenItems && f.location === '/fileupload') {
                                     return false;
                                   }
 

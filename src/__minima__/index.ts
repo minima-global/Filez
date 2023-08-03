@@ -133,7 +133,7 @@ export function loadBinary(fileName: string) {
 }
 
 export function downloadFile(path: string, downloadName: string) {
-  return new Promise((resolve, reject) => {
+  return new Promise( (resolve) => {
     // webview download support
     // do not load binary
     if (isMinimaBrowser) {
@@ -144,28 +144,23 @@ export function downloadFile(path: string, downloadName: string) {
       return resolve(true);
     }
 
-    MDS.file.loadbinary(path, function (msg: any) {
-      try {
+    const filePath = `/downloads/${downloadName}`;
+    logDownload(filePath);
 
-        const filedata = msg.response.load.data.substring(2);
-        const b64 = MDS.util.hexToBase64(filedata);
-        const binaryData = MDS.util.base64ToArrayBuffer(b64);
-        const blob = new Blob([binaryData], { type: 'application/octet-stream' });
+    // On Desktop - do a link download... although this would also work on Phone...
+    // Create the NEW filename... with special string..
+    const newFileName = downloadName + "_minima_download_as_file_";
 
-        const url = URL.createObjectURL(blob);
+    //Copy the original file to webfolder - WITH the special name
+    MDS.file.copytoweb(path, `/my_downloads/${newFileName}`, function() {
+      // Get the URL to this File - with the special ending which makes it download
+      const url = `my_downloads/${newFileName}`;
 
-        // Create a link element
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = downloadName;
-        document.body.appendChild(link);
-        link.click();
-
-        URL.revokeObjectURL(url);
-        return resolve(true);
-      } catch {
-        reject();
-      }
+      // Now create a normal link - that when clicked downloads it..
+      const link         = document.createElement('a');
+      link.href         = url;
+      document.body.appendChild(link);
+      link.click();
     });
   });
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { makeFolder, moveFile } from '../../__minima__';
 import { useFileList, useHelpers } from '../../hooks';
 import File from '../File';
@@ -7,9 +7,12 @@ import { formatBytes } from '../../utilities';
 import CopyPath from '../../components/CopyPath';
 import ErrorModal from '../../components/Error';
 import LoadingModal from '../../components/LoadingModal';
-import { MinimaFile } from "../../types";
+import { MinimaFile } from '../../types';
+import SettingsDrawer from '../../components/SettingsDrawer';
+import { appContext } from '../../AppContext';
 
 const Home = () => {
+  const { showHiddenItems } = useContext(appContext);
   const fileInput = useRef<HTMLInputElement | null>(null);
   const { title, previousPath, list, path, setPath, canonical, reloadDirectory } = useFileList(true);
   const { renderIcon } = useHelpers();
@@ -18,13 +21,14 @@ const Home = () => {
   const [error, setError] = useState(false);
 
   const [displayFile, setDisplayFile] = useState<MinimaFile | false>(false);
-  const [displayMove, setDisplayMove] = useState<{ file: MinimaFile, path: string } | string[] | false>(false);
+  const [displayMove, setDisplayMove] = useState<{ file: MinimaFile; path: string } | string[] | false>(false);
   const [displaySearch, setDisplaySearch] = useState(false);
-  const [displayMenu, setDisplayMenu] = useState<{ file: MinimaFile, path: string } | string[] | false>(false);
+  const [displayMenu, setDisplayMenu] = useState<{ file: MinimaFile; path: string } | string[] | false>(false);
   const [displayRename, setDisplayRename] = useState<boolean | null>(null);
-  const [displayDelete, setDisplayDelete] = useState<{ file: MinimaFile, path?: string } | string[] | false>(false);
+  const [displayDelete, setDisplayDelete] = useState<{ file: MinimaFile; path?: string } | string[] | false>(false);
   const [displayCreateFolder, setDisplayCreateFolder] = useState(false);
   const [displayMultipleMenu, setDisplayMultipleMenu] = useState<string[] | false>(false);
+  const [displaySettings, setDisplaySettings] = useState(false);
   const [displayCopyPath, setDisplayCopyPath] = useState<MinimaFile | false>(false);
 
   const [uploading, setUploading] = useState(false);
@@ -168,8 +172,12 @@ const Home = () => {
       );
     }
 
+    if (!showHiddenItems) {
+      orderedList = orderedList.filter((i: any) => i.location !== '/fileupload');
+    }
+
     return orderedList;
-  }, [list, query, sort]);
+  }, [list, query, sort, showHiddenItems]);
 
   /**
    * Toggles all files so that they're either all selected or all not selected
@@ -178,7 +186,17 @@ const Home = () => {
     if (checked.length === list.length) {
       setChecked([]);
     } else {
-      setChecked(list.map((i: any) => i.location).filter((i) => i !== '/fileupload'));
+      setChecked(
+        list
+          .map((i: any) => i.location)
+          .filter((i) => {
+            if (!showHiddenItems) {
+              return i !== '/fileupload';
+            }
+
+            return true;
+          })
+      );
     }
   };
 
@@ -268,6 +286,7 @@ const Home = () => {
         createFolder={createFolder}
         callback={reloadDirectory}
       />
+      <SettingsDrawer display={displaySettings} close={() => setDisplaySettings(false)} />
       <DeleteItem data={displayDelete} display={!!displayDelete} close={hideDelete} callback={reloadDirectory} />
       <RenameItem data={displayRename} display={!!displayRename} close={hideRename} callback={reloadDirectory} />
       <CopyPath data={displayCopyPath} display={!!displayCopyPath} close={() => setDisplayCopyPath(false)} />
@@ -294,7 +313,7 @@ const Home = () => {
               Back
             </div>
           </div>
-          <div className="col-span-1 flex items-center justify-end gap-5">
+          <div onClick={() => setDisplaySettings(true)} className="col-span-1 flex items-center justify-end gap-4">
             <svg
               onClick={showSearch}
               className="cursor-pointer"
@@ -308,6 +327,24 @@ const Home = () => {
                 d="M16.1384 17.1923L9.85765 10.9115C9.35765 11.3243 8.78265 11.6474 8.13265 11.8807C7.48265 12.114 6.81022 12.2307 6.11535 12.2307C4.40618 12.2307 2.95967 11.6389 1.7758 10.4554C0.591933 9.27178 0 7.82564 0 6.11693C0 4.40819 0.591784 2.96152 1.77535 1.7769C2.95892 0.5923 4.40507 0 6.1138 0C7.82252 0 9.26918 0.591933 10.4538 1.7758C11.6384 2.95967 12.2307 4.40618 12.2307 6.11535C12.2307 6.82945 12.1109 7.5115 11.8711 8.1615C11.6314 8.8115 11.3115 9.37689 10.9115 9.85765L17.1922 16.1384L16.1384 17.1923ZM6.11535 10.7308C7.40382 10.7308 8.49517 10.2836 9.3894 9.3894C10.2836 8.49517 10.7308 7.40382 10.7308 6.11535C10.7308 4.82688 10.2836 3.73553 9.3894 2.8413C8.49517 1.94707 7.40382 1.49995 6.11535 1.49995C4.82688 1.49995 3.73553 1.94707 2.8413 2.8413C1.94708 3.73553 1.49998 4.82688 1.49998 6.11535C1.49998 7.40382 1.94708 8.49517 2.8413 9.3894C3.73553 10.2836 4.82688 10.7308 6.11535 10.7308Z"
                 fill="#08090B"
               />
+            </svg>
+            <svg
+              className="cursor-pointer"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <mask id="mask0_56_4179" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24" fill="#D9D9D9" />
+              </mask>
+              <g mask="url(#mask0_56_4179)">
+                <path
+                  d="M12 19.2688C11.5875 19.2688 11.2344 19.122 10.9406 18.8282C10.6469 18.5345 10.5 18.1814 10.5 17.7689C10.5 17.3564 10.6469 17.0033 10.9406 16.7095C11.2344 16.4158 11.5875 16.2689 12 16.2689C12.4125 16.2689 12.7656 16.4158 13.0593 16.7095C13.3531 17.0033 13.5 17.3564 13.5 17.7689C13.5 18.1814 13.3531 18.5345 13.0593 18.8282C12.7656 19.122 12.4125 19.2688 12 19.2688ZM12 13.4996C11.5875 13.4996 11.2344 13.3527 10.9406 13.059C10.6469 12.7652 10.5 12.4121 10.5 11.9996C10.5 11.5872 10.6469 11.234 10.9406 10.9403C11.2344 10.6465 11.5875 10.4997 12 10.4997C12.4125 10.4997 12.7656 10.6465 13.0593 10.9403C13.3531 11.234 13.5 11.5872 13.5 11.9996C13.5 12.4121 13.3531 12.7652 13.0593 13.059C12.7656 13.3527 12.4125 13.4996 12 13.4996ZM12 7.73039C11.5875 7.73039 11.2344 7.58352 10.9406 7.28977C10.6469 6.99604 10.5 6.64292 10.5 6.23042C10.5 5.81794 10.6469 5.46482 10.9406 5.17107C11.2344 4.87734 11.5875 4.73047 12 4.73047C12.4125 4.73047 12.7656 4.87734 13.0593 5.17107C13.3531 5.46482 13.5 5.81794 13.5 6.23042C13.5 6.64292 13.3531 6.99604 13.0593 7.28977C12.7656 7.58352 12.4125 7.73039 12 7.73039Z"
+                  fill="#08090B"
+                />
+              </g>
             </svg>
           </div>
         </div>
@@ -362,12 +399,7 @@ const Home = () => {
           <div className="flex gap-2 pl-5 pr-5 pb-2">
             <label className="button cursor-pointer">
               Upload file
-              <input
-                type="file"
-                ref={fileInput}
-                onChange={handleFileOnChange}
-                className="button hidden"
-              />
+              <input type="file" ref={fileInput} onChange={handleFileOnChange} className="button hidden" />
             </label>
             <button onClick={showCreateFolder} className="button">
               Create folder
@@ -392,7 +424,7 @@ const Home = () => {
                   type="checkbox"
                   className="checkbox"
                   readOnly
-                  checked={list ? list.length === checked.length : false}
+                  checked={list ? (showHiddenItems ? list.length : list.length - 1) === checked.length : false}
                   onClick={toggleAll}
                 />
               </div>
@@ -415,10 +447,6 @@ const Home = () => {
         <div className="flex flex-col p-5">
           {files &&
             files.map((file: any) => {
-              if (file.location === '/fileupload') {
-                return <div key="unknown" />;
-              }
-
               return (
                 <div
                   key={file.name}
