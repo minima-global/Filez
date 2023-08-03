@@ -91,6 +91,13 @@ export function MoveItem({ display, data, close, callback }: MoveItemProps) {
                             {list &&
                               list
                                 .sort((a: any, b: any) => b.isdir - a.isdir)
+                                .filter((f) => {
+                                  if (f.location === '/fileupload') {
+                                    return false;
+                                  }
+
+                                  return true;
+                                })
                                 .map((folder: any) => (
                                   <li
                                     key={folder.name}

@@ -178,7 +178,7 @@ const Home = () => {
     if (checked.length === list.length) {
       setChecked([]);
     } else {
-      setChecked(list.map((i: any) => i.location));
+      setChecked(list.map((i: any) => i.location).filter((i) => i !== '/fileupload'));
     }
   };
 
