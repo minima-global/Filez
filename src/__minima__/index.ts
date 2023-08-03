@@ -144,7 +144,7 @@ export function downloadFile(path: string, downloadName: string) {
       return resolve(true);
     }
 
-    const filePath = `/downloads/${downloadName}`;
+    const filePath = `/my_downloads/${downloadName}`;
     logDownload(filePath);
 
     // On Desktop - do a link download... although this would also work on Phone...

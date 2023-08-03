@@ -34,7 +34,7 @@ const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
           MDS.sql('CREATE TABLE IF NOT EXISTS downloaded (id bigint auto_increment,file_path varchar(2048) NOT NULL)', function() {
             getDownloads().then(async (downloads: any) => {
               for (const file of downloads) {
-                await deleteFromWeb(file.FILE_PATH);
+                await deleteFromWeb(file.FILE_PATH + "_minima_download_as_file_");
                 await clearDownload(file.FILE_PATH);
               }
             })
