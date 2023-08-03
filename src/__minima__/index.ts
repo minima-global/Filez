@@ -161,6 +161,7 @@ export function downloadFile(path: string, downloadName: string) {
       link.href         = url;
       document.body.appendChild(link);
       link.click();
+      resolve(true);
     });
   });
 }
