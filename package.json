@@ -1,6 +1,6 @@
 {
     "name": "filez",
-    "version": "1.9.0",
+    "version": "1.9.1",
     "private": true,
     "description": "Simple file manager",
     "type": "module",
@@ -19,6 +19,7 @@
         "@amelix/react-lottie": "^1.2.4",
         "@types/dompurify": "^3.0.2",
         "@types/lodash": "^4.14.195",
+        "@vitejs/plugin-legacy": "^4.1.1",
         "axios": "^1.4.0",
         "colorthief": "^2.4.0",
         "dompurify": "^3.0.5",
