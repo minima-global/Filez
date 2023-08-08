@@ -497,7 +497,7 @@ const Home = () => {
           {noFiles && !hasQuery && (
             <div className="max-w-sm py-10 lg:py-20 text-center mx-auto">
               <div className="flex flex-col justify-center gap-5">
-                <h5 className="text-xl mx-5 mb-6">Your Files are empty, let’s add something</h5>
+                <h5 className="text-xl mx-5 mb-6">Your Files are empty, let’s add some</h5>
                 <label className="button button--thick cursor-pointer">
                   Add a file
                   <input type="file" onChange={handleFileOnChange} className="button hidden" />
