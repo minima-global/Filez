@@ -1,5 +1,9 @@
 # Changelog
 
+##### [1.9.2] - 08 August 23
+
+- Minor text changes
+
 ##### [1.9.0] - 03 August 23
 
 - Fixes issue with big download files on desktop
