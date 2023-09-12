@@ -1,5 +1,9 @@
 # Changelog
 
+##### [1.9.3] - 08 August 23
+
+- update mds.js
+
 ##### [1.9.2] - 08 August 23
 
 - Minor text changes
